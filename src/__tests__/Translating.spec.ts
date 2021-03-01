@@ -1,7 +1,7 @@
 import { NormalizedQuery } from "@opaquejs/query";
 import { Example, examples, ignore, runAsTest } from "@opaquejs/testing";
 import Knex from "knex";
-import { translateOpaqueQueryToLucidModifier } from "..";
+import { translateOpaqueQueryToKnexModifier } from "..";
 
 const queries: [NormalizedQuery, string][] = [
   // Comparators
@@ -68,7 +68,7 @@ export class Translating {
 
   @examples(...queries)
   translatedCorrectly(opaquequery: Example<NormalizedQuery>, sql: Example<string>) {
-    const applier = translateOpaqueQueryToLucidModifier(opaquequery);
+    const applier = translateOpaqueQueryToKnexModifier(opaquequery);
     expect(applier(this._knex().queryBuilder()).toQuery()).toBe(`select * where ${sql}`.trim());
   }
 }
