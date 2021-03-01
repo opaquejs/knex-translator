@@ -2,7 +2,6 @@
   "compilerOptions": {
     "target": "es5",
     "module": "commonjs",
-    "types": ["@adonisjs/lucid", "@adonisjs/core", "jest"],
     "declaration": true,
     "outDir": "./lib",
     "strict": true,
