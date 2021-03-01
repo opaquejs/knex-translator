@@ -1,7 +1,6 @@
 import { NormalizedQuery } from "@opaquejs/query";
-import Knex from "knex";
 
-const OpaqueLucidComparatorMapping = {
+export const OpaqueKnexComparatorMapping = {
   "==": "=",
   ">": ">",
   "<": "<",
@@ -16,40 +15,40 @@ export interface KnexLike {
   offset(n: number): this;
   where(
     key: string,
-    comparator: typeof OpaqueLucidComparatorMapping[keyof typeof OpaqueLucidComparatorMapping],
+    comparator: typeof OpaqueKnexComparatorMapping[keyof typeof OpaqueKnexComparatorMapping],
     value: any
   ): this;
   andWhere(m: (q: this) => this): this;
   orWhere(m: (q: this) => this): this;
 }
 
-export function translateOpaqueQueryToLucidModifier(source: NormalizedQuery) {
-  return <T extends KnexLike>(lucid: T): T => {
+export function translateOpaqueQueryToKnexModifier(source: NormalizedQuery) {
+  return <T extends KnexLike>(knex: T): T => {
     if (source._limit != undefined) {
-      lucid = lucid.limit(source._limit);
+      knex = knex.limit(source._limit);
     }
     if (source._skip != undefined) {
-      lucid = lucid.offset(source._skip);
+      knex = knex.offset(source._skip);
     }
     if ("key" in source) {
-      return lucid.where(
+      return knex.where(
         source.key,
-        OpaqueLucidComparatorMapping[source.comparator],
+        OpaqueKnexComparatorMapping[source.comparator],
         source.value as any
       );
     }
     if ("_and" in source) {
       for (const subsource of source._and) {
-        lucid = lucid.andWhere(translateOpaqueQueryToLucidModifier(subsource));
+        knex = knex.andWhere(translateOpaqueQueryToKnexModifier(subsource));
       }
-      return lucid;
+      return knex;
     }
     if ("_or" in source) {
       for (const subsource of source._or) {
-        lucid = lucid.orWhere(translateOpaqueQueryToLucidModifier(subsource));
+        knex = knex.orWhere(translateOpaqueQueryToKnexModifier(subsource));
       }
-      return lucid;
+      return knex;
     }
-    return lucid;
+    return knex;
   };
 }
