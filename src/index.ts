@@ -1,4 +1,5 @@
 import { NormalizedQuery } from "@opaquejs/query";
+import Knex from "knex";
 
 const OpaqueLucidComparatorMapping = {
   "==": "=",
@@ -10,7 +11,7 @@ const OpaqueLucidComparatorMapping = {
   "!=": "!=",
 } as const;
 
-export interface LucidLike {
+export interface KnexLike {
   limit(n: number): this;
   offset(n: number): this;
   where(
@@ -23,7 +24,7 @@ export interface LucidLike {
 }
 
 export function translateOpaqueQueryToLucidModifier(source: NormalizedQuery) {
-  return <T extends LucidLike>(lucid: T): T => {
+  return <T extends KnexLike>(lucid: T): T => {
     if (source._limit != undefined) {
       lucid = lucid.limit(source._limit);
     }
@@ -31,7 +32,11 @@ export function translateOpaqueQueryToLucidModifier(source: NormalizedQuery) {
       lucid = lucid.offset(source._skip);
     }
     if ("key" in source) {
-      return lucid.where(source.key, OpaqueLucidComparatorMapping[source.comparator], source.value as any);
+      return lucid.where(
+        source.key,
+        OpaqueLucidComparatorMapping[source.comparator],
+        source.value as any
+      );
     }
     if ("_and" in source) {
       for (const subsource of source._and) {
