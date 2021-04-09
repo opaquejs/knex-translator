@@ -56,6 +56,8 @@ const queries: [NormalizedQuery, string][] = [
     { key: "key", comparator: "==", value: "test 1", _skip: 1, _limit: 2 },
     "`key` = 'test 1' limit 2 offset 1",
   ],
+  [{ key: "key", comparator: "==", value: null }, "`key` is null"],
+  [{ key: "key", comparator: "!=", value: null }, "`key` is not null"],
 ];
 
 @runAsTest()

@@ -19,6 +19,7 @@ export interface KnexLike {
     value: any
   ): this;
   whereNull(key: string): this;
+  whereNotNull(key: string): this;
   andWhere(m: (q: this) => this): this;
   orWhere(m: (q: this) => this): this;
 }
@@ -32,8 +33,11 @@ export function translateOpaqueQueryToKnexModifier(source: NormalizedQuery) {
       knex = knex.offset(source._skip);
     }
     if ("key" in source) {
-      if (source.value === null) {
+      if (source.value === null && source.comparator == "==") {
         return knex.whereNull(source.key);
+      }
+      if (source.value === null && source.comparator == "!=") {
+        return knex.whereNotNull(source.key);
       }
       return knex.where(
         source.key,
