@@ -22,10 +22,16 @@ export interface KnexLike {
   whereNotNull(key: string): this;
   andWhere(m: (q: this) => this): this;
   orWhere(m: (q: this) => this): this;
+  orderBy(config: { column: string; order: "asc" | "desc" }[]): this;
 }
 
 export function translateOpaqueQueryToKnexModifier(source: NormalizedQuery) {
   return <T extends KnexLike>(knex: T): T => {
+    if (source._orderBy != undefined) {
+      knex = knex.orderBy(
+        source._orderBy.map((entry) => ({ column: entry.key, order: entry.direction }))
+      );
+    }
     if (source._limit != undefined) {
       knex = knex.limit(source._limit);
     }

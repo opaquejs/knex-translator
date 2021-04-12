@@ -58,6 +58,24 @@ const queries: [NormalizedQuery, string][] = [
   ],
   [{ key: "key", comparator: "==", value: null }, "`key` is null"],
   [{ key: "key", comparator: "!=", value: null }, "`key` is not null"],
+
+  // Ordering
+  [
+    { key: "dummy", comparator: "==", value: null, _orderBy: [{ key: "title", direction: "asc" }] },
+    "`dummy` is null order by `title` asc",
+  ],
+  [
+    {
+      key: "dummy",
+      comparator: "==",
+      value: null,
+      _orderBy: [
+        { key: "title", direction: "asc" },
+        { key: "description", direction: "desc" },
+      ],
+    },
+    "`dummy` is null order by `title` asc, `description` desc",
+  ],
 ];
 
 @runAsTest()
