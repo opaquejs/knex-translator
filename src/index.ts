@@ -1,4 +1,4 @@
-import { NormalizedQuery } from "@opaquejs/query";
+import { NormalizedQuery, OrderEntry } from "@opaquejs/query";
 
 export const OpaqueKnexComparatorMapping = {
   "==": "=",
@@ -25,14 +25,22 @@ export interface KnexLike {
   orderBy(config: { column: string; order: "asc" | "desc" }[]): this;
 }
 
+export function translateOrderBy(source: OrderEntry[]) {
+  return source.map((entry) => ({ column: entry.key, order: entry.direction }));
+}
+
 export function parseOpaqueQuery(source: NormalizedQuery) {
   return {
     build: translateOpaqueQueryToKnexModifier(source),
     applyGlobals: <T extends KnexLike>(query: T) => {
-      if (source._limit) query = query.limit(source._limit);
-      if (source._skip) query = query.offset(source._skip);
+      if (source._limit != undefined) query = query.limit(source._limit);
+      if (source._skip != undefined) query = query.offset(source._skip);
+      if (source._orderBy != undefined) query = query.orderBy(translateOrderBy(source._orderBy));
 
       return query;
+    },
+    get orderBy() {
+      return translateOrderBy(source._orderBy || []);
     },
     get limit() {
       return source._limit;
@@ -45,11 +53,6 @@ export function parseOpaqueQuery(source: NormalizedQuery) {
 
 export function translateOpaqueQueryToKnexModifier(source: NormalizedQuery) {
   return <T extends KnexLike>(knex: T): T => {
-    if (source._orderBy != undefined) {
-      knex = knex.orderBy(
-        source._orderBy.map((entry) => ({ column: entry.key, order: entry.direction }))
-      );
-    }
     if ("key" in source) {
       if (source.value === null && source.comparator == "==") {
         return knex.whereNull(source.key);
