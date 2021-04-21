@@ -25,18 +25,30 @@ export interface KnexLike {
   orderBy(config: { column: string; order: "asc" | "desc" }[]): this;
 }
 
+export function parseOpaqueQuery(source: NormalizedQuery) {
+  return {
+    build: translateOpaqueQueryToKnexModifier(source),
+    applyGlobals: <T extends KnexLike>(query: T) => {
+      if (source._limit) query = query.limit(source._limit);
+      if (source._skip) query = query.offset(source._skip);
+
+      return query;
+    },
+    get limit() {
+      return source._limit;
+    },
+    get offset() {
+      return source._skip;
+    },
+  };
+}
+
 export function translateOpaqueQueryToKnexModifier(source: NormalizedQuery) {
   return <T extends KnexLike>(knex: T): T => {
     if (source._orderBy != undefined) {
       knex = knex.orderBy(
         source._orderBy.map((entry) => ({ column: entry.key, order: entry.direction }))
       );
-    }
-    if (source._limit != undefined) {
-      knex = knex.limit(source._limit);
-    }
-    if (source._skip != undefined) {
-      knex = knex.offset(source._skip);
     }
     if ("key" in source) {
       if (source.value === null && source.comparator == "==") {
