@@ -1,6 +1,6 @@
 {
   "name": "@opaquejs/knex-translator",
-  "version": "0.2.7",
+  "version": "0.3.0",
   "description": "Translates Opaque Queries for any knex-like query-builder",
   "main": "lib/index.js",
   "files": [
