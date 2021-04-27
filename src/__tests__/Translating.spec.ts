@@ -76,6 +76,10 @@ const queries: [NormalizedQuery, string][] = [
     },
     "`dummy` is null order by `title` asc, `description` desc",
   ],
+
+  // not
+  [{ _not: { key: "dummy", comparator: "==", value: null } }, "not (`dummy` is null)"],
+  [{ _not: { key: "dummy", comparator: "in", value: [1, 2] } }, "not (`dummy` in (1, 2))"],
 ];
 
 @runAsTest()

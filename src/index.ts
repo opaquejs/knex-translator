@@ -21,6 +21,7 @@ export interface KnexLike {
   whereNull(key: string): this;
   whereNotNull(key: string): this;
   andWhere(m: (q: this) => this): this;
+  andWhereNot(m: (q: this) => this): this;
   orWhere(m: (q: this) => this): this;
   orderBy(config: { column: string; order: "asc" | "desc" }[]): this;
 }
@@ -65,6 +66,9 @@ export function translateOpaqueQueryToKnexModifier(source: NormalizedQuery) {
         OpaqueKnexComparatorMapping[source.comparator],
         source.value as any
       );
+    }
+    if ("_not" in source) {
+      return knex.andWhereNot(translateOpaqueQueryToKnexModifier(source._not));
     }
     if ("_and" in source) {
       for (const subsource of source._and) {
